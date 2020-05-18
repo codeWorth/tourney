@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "tourney-741bf": {
+      "hosting": {
+        "Tourney": [
+          "tourney-741bf"
+        ]
+      }
+    }
+  }
+}

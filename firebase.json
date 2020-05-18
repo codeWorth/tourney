@@ -1,0 +1,19 @@
+{
+  "hosting": [
+    {
+      "target": "Tourney",
+      "public": "dist/Tourney",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}
