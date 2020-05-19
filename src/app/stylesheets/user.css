@@ -1,0 +1,48 @@
+.userDisplay {
+	padding: 20px;
+	height: 92vh;
+}
+
+.userDisplay .spaced * {
+	margin-bottom: 18px;
+}
+
+.userDisplay h2 {
+	font-size: 37px;
+}
+
+.userDisplay h4 {
+	font-size: 29px;
+}
+
+.userDisplay h5 {
+	font-size: 20px;
+}
+
+.userDisplay ul {
+	list-style: none;
+	padding-left: 0px;
+	margin-bottom: 24px;
+}
+
+.userDisplay li {
+	padding: 3px;
+	background-color: rgba(0, 0, 0, 0);
+	vertical-align: middle;
+	font-size: 20px;
+	border-radius: 2;
+}
+
+.userDisplay li .icon {
+	height: 30px;
+	width: auto;
+	float: right;
+	margin-left: 18px;
+}
+.userDisplay li .icon:hover {
+	cursor: pointer;
+}
+
+.userDisplay li:hover {
+	background-color: rgba(0, 0, 0, 0.15);
+}

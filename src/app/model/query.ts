@@ -1,6 +1,7 @@
-import { DocRef } from '../models';
 import { Subscription, Observable, Subject, ReplaySubject } from 'rxjs';
 import { DocumentChangeAction, DocumentReference } from '@angular/fire/firestore/interfaces';
+import { AngularFirestoreCollection, AngularFirestoreDocument } from '@angular/fire/firestore/public_api';
+import { DocRef } from './models';
 
 export interface QueryInterface<T> {
 	id: string;
@@ -12,21 +13,21 @@ export interface QueryInterface<T> {
 
 export function QueryBuilder<T>(
 	subject: ReplaySubject<Map<string, T>>,
-	start: Observable<DocumentChangeAction<DocRef>[]>,
-	funcs: ((ref: DocumentReference) => Observable<DocumentChangeAction<DocRef>[]>)[],
-	end: (ref: DocumentReference) => Observable<T>
+	start: AngularFirestoreCollection<DocRef>,
+	funcs: ((ref: DocumentReference) => AngularFirestoreCollection<DocRef>)[],
+	end: (ref: DocumentReference) => AngularFirestoreDocument<T>
 ): QueryInterface<T> {
 	let data: Map<string, T> = new Map();
 	let topQuery: QueryStep<T> = new QueryStep<T>(
-		start,
+		start.stateChanges(),
 		build<T>(funcs, end, data, subject)
 	);
 	return topQuery;
 }
 
 function build<T>(
-	funcs: ((ref: DocumentReference) => Observable<DocumentChangeAction<DocRef>[]>)[],
-	finisher: (ref: DocumentReference) => Observable<T>,
+	funcs: ((ref: DocumentReference) => AngularFirestoreCollection<DocRef>)[],
+	finisher: (ref: DocumentReference) => AngularFirestoreDocument<T>,
 	data: Map<string, T>,
 	subject: Subject<Map<string, T>>,
 	index: number = 0
@@ -34,13 +35,13 @@ function build<T>(
 	if (index < funcs.length) {
 		let func = funcs[index];
 		return ref => new QueryStep<T>(
-			func(ref),
+			func(ref).stateChanges(),
 			build(funcs, finisher, data, subject, index+1)
 		);
 	} else {
 		return ref => new QueryResult(
 			ref.id,
-			finisher(ref),
+			finisher(ref).valueChanges(),
 			data,
 			subject
 		);
@@ -68,7 +69,7 @@ class QueryStep<T> implements QueryInterface<T> {
 					this.index.set(ref.id, qs);
 					break;
 				case "removed":
-					this.remove();
+					this.index.get(ref.id).remove();
 					break;
 				case "modified":
 					console.error("DocRef modified, illegal action!\n", ref);

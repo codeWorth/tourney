@@ -1,0 +1,40 @@
+.teamDisplay {
+	padding: 20px;
+	height: 92vh;
+}
+
+.teamDisplay h2 {
+	font-size: 37px;
+}
+
+.teamDisplay h4 {
+	font-size: 29px;
+}
+
+.teamDisplay ul {
+	list-style: none;
+	padding-left: 0px;
+	margin-bottom: 24px;
+}
+
+.teamDisplay li {
+	padding: 3px;
+	background-color: rgba(0, 0, 0, 0);
+	vertical-align: middle;
+	font-size: 20px;
+	border-radius: 2;
+	max-width: 420px;
+}
+
+.teamDisplay hr {
+	max-width: 420px;
+	margin: 0px
+}
+
+.teamDisplay li.captain {
+	background-color: rgba(255, 215, 0, 0.4);
+}
+
+.teamDisplay li:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}

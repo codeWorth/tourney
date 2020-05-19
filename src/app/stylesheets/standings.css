@@ -1,0 +1,12 @@
+.standingsDisplay {
+	padding: 20px;
+	height: 92vh;
+}
+
+.standingsDisplay .teamItem {
+	border-radius: 2;
+}
+
+.standingsDisplay .teamItem:hover {
+	background-color: rgba(0, 0, 0, 0.1);
+}

@@ -1,11 +1,11 @@
 import { AngularFirestore, DocumentReference } from '@angular/fire/firestore'
 import { ReplaySubject } from 'rxjs';
-import { DocRef, Tournament } from '../models';
-import { QueryInterface, QueryBuilder } from './query';
-import { QueryManager } from './query.manager';
+import { QueryInterface, QueryBuilder } from '../query';
+import { QueryManager } from '../query.manager';
+import { Tournament, DocRef } from '../models';
 
 
-export class TournamentsService extends QueryManager<Tournament> {
+export class PlayerTournaments extends QueryManager<Tournament> {
 	private tournaments$: ReplaySubject<Map<string, Tournament>>
 
 	constructor(private fs: AngularFirestore) { 
@@ -20,9 +20,9 @@ export class TournamentsService extends QueryManager<Tournament> {
 	protected queryBuilder(user: DocumentReference): QueryInterface<Tournament> {
 		return QueryBuilder<Tournament>(
 			this.tournaments$,
-			this.fs.doc(user.path).collection<DocRef>("teams").stateChanges(),
-			[ref => this.fs.doc(ref.path).collection<DocRef>("tournaments").stateChanges()],
-			ref => this.fs.doc<Tournament>(ref.path).valueChanges()
+			this.fs.doc(user.path).collection<DocRef>("teams"),
+			[ref => this.fs.doc(ref.path).collection<DocRef>("tournaments")],
+			ref => this.fs.doc<Tournament>(ref.path)
 		);
 	}
 

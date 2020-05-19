@@ -1,0 +1,35 @@
+.sidebar {
+	background-color: #93aed9;
+	padding: 16px;
+	color: #212529;
+}
+
+.sidebar h2 {
+	font-size: 37px;
+}
+
+.sidebar h4 {
+	font-size: 29px;
+}
+
+.sidebar ul {
+	list-style: none;
+	padding-left: 0px;
+	margin-bottom: 24px;
+}
+
+.sidebar li {
+	padding: 3px;
+	background-color: rgba(0, 0, 0, 0);
+	vertical-align: middle;
+	font-size: 20px;
+	border-radius: 2;
+}
+
+.sidebar li.selected {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar li:hover {
+	background-color: rgba(0, 0, 0, 0.3);
+}

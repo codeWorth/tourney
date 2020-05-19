@@ -1,0 +1,62 @@
+.nav-banner {
+	background-color: #212529;
+	padding: 8px 0px;
+	top: 0;
+    right: 0;
+	left: 0;
+	min-height: 8vh;
+}
+
+.nav-mainitem {
+	display: inline;
+	font-size: 32px;
+	color: #fff;
+	padding: 5px;
+	cursor: default;
+	text-align: center;
+}
+
+.nav-item {
+	display: inline;
+	font-size: 24px;
+	color: rgba(255,255,255,.5);
+	padding: 5px;
+	cursor: pointer;
+	text-align: center;
+	border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-item.active {
+	color: #fff;
+}
+
+.nav-image.active {
+	box-shadow: 0px 0px 1px 2px white;
+}
+
+#user-alert {
+	position: absolute;
+	bottom: -5px;
+	left: 45px;
+	z-index: 100;
+	background-color: red;
+	border-radius: 12px;
+	min-width: 24px;
+	height: 24px;
+	color: white;
+	font-size: 18px;
+	padding-left: 7px;
+	padding-right: 7px;
+}
+#user-alert b {
+	position: relative;
+	top: -2px;
+}
+
+.hide {
+	visibility: hidden;
+}
+
+.big-text {
+	font-size: 20px;
+}

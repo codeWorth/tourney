@@ -1,7 +1,6 @@
-import { AngularFirestore, DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from '@angular/fire/firestore';
 import { ReplaySubject } from 'rxjs';
-import { DocRef } from '../models';
-import { QueryInterface, QueryBuilder } from './query';
+import { QueryInterface } from './query';
 
 export abstract class QueryManager<T> {
 	private query: QueryInterface<T>;
@@ -10,7 +9,7 @@ export abstract class QueryManager<T> {
 	public abstract subject$(): ReplaySubject<Map<string, T>>;
 	protected abstract queryBuilder(ref: DocumentReference): QueryInterface<T>; 
 
-	public userUpdate(ref: DocumentReference) {
+	public update(ref: DocumentReference) {
 		if (ref) {
 			if (this.ref && this.ref.path == ref.path) {
 				return;

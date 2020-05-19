@@ -1,5 +1,5 @@
 <div class="container-fluid">
-	<div *ngIf="player.user$ | async as user; else login" class="row nav-banner align-items-center">
+	<div *ngIf="player.user$ | async as user; else login" class="row nav-banner">
 		<div class="col-xl-1 col-md-2 nav-mainitem">
 			Tourney
 		</div>
@@ -37,23 +37,32 @@
 		</div>
 		<div class="col-xl-6 d-none d-xl-block"></div>
 		<div class="col-xl-1 col-md-2" style="text-align: center;">
-			<img src="{{user.photoURL}}" class="rounded nav-image" [class.active]="window=='account'" height=60 style="margin-right: 0.5rem;" (click)="window='account'"/>
+			<div style="position: relative; display: inline-block;">
+				<img src="{{user.photoURL || '../assets/unknown.png'}}" class="rounded nav-image" [class.active]="window=='account'" height=60 (click)="window='account'"/>
+				<div 
+					*ngIf="player.invites.subject$() | async as invites" 
+					[hidden]="invites.size == 0"
+					id="user-alert"
+				>
+					<b>{{invites.size}}</b>
+				</div>
+			</div>
 		</div>
 	</div>
 	<ng-template #login>
-		<div class="row nav-banner align-items-center">
+		<div class="row nav-banner">
 			<div class="col-lg-1 col-md-2 nav-mainitem">
 				Tourney
 			</div>
 			<div class="col-lg-10 col-md-8"></div>
 			<div class="col-lg-1 col-md-2" style="text-align: center;">
-				<button class="btn btn-outline-success my-2 my-sm-0 big-text" (click)="player.googleSignIn()">Log In</button>
+				<button class="btn btn-outline-success big-text" (click)="player.googleSignIn()">Log In</button>
 			</div>
 		</div>
 	</ng-template>
 
-	<div *ngIf="player.user$ | async; else loginPage">
-		<div *ngIf="window == 'tournament' || window == 'standings' || window == 'matches'" class="row full-height">
+	<div *ngIf="player.user$ | async as user" style="position: relative;">
+		<div *ngIf="window=='tournament' || window=='standings' || window=='matches'" class="row">
 			<div class="col-xl-2 col-md-4 sidebar">
 				<h2>Tournaments</h2>
 				<ul>
@@ -114,8 +123,9 @@
 					</div>
 				</div>
 			</div>
+			<div *ngIf="window=='matches'" class="col-xl-10 col-md-8 matchesDisplay"></div>
 		</div>
-		<div *ngIf="window == 'teams'" class="row full-height">
+		<div *ngIf="window == 'teams'" class="row">
 			<div class="col-xl-2 col-md-4 sidebar">
 				<h2>Teams</h2>
 				<ul>
@@ -124,7 +134,7 @@
 					<li 
 						*ngFor="let team of (player.teams.subject$() | async | keyvalue)"
 						[class.selected]="sidebarInfo.teams.selected==team.value"
-						(click)="sidebarInfo.teams.selected=team.value"
+						(click)="selectTeam(team.key, team.value)"
 					>
 						{{team.value.name}}
 					</li>
@@ -132,33 +142,104 @@
 			</div>
 			<div class="col-xl-10 col-md-8 teamDisplay">
 				<div *ngIf="sidebarInfo.teams.selected">
-					<h2>{{sidebarInfo.teams.selected.name}}</h2>
+					<h2>{{team.name}}</h2>
+					<h4>Players</h4>
+					<ul>
+						<li *ngIf="user.id.id == team.captain.id" (click) = "addPlayer();">+ Add player</li>
+						<hr>
+						<li 
+							*ngFor="let player of (team.players.subject$() | async | keyvalue)"
+							[class.captain]="player.key == team.captain.id"
+						>
+							{{player.value.name}} "{{player.value.ign}}"
+						</li>
+					</ul>
+					<pre>Tourneys:{{team.tournaments.subject$() | async}}</pre>
+					<button *ngIf="user.id.id == team.captain.id" type="button" class="btn btn-outline-danger" (click)="deleteTeam()">Delete Team</button>
+					<button *ngIf="user.id.id != team.captain.id" type="button" class="btn btn-outline-danger" (click)="leaveTeam()">Leave Team</button>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div *ngIf="window == 'account'" class="row userDisplay">
-		<div *ngIf="player.user$ | async as user">
-			<h2>{{user.name}}</h2>
-			<input 
-				class="form-control" 
-				placeholder="Enter IGN" 
-				[ngModel]="user.ign || ''" 
-				(ngModelChange)="user.ign=$event; userDetailInfo.changed=true;"
-			/>
-			<button 
-				style="margin-bottom: 2.3rem;" 
-				[class.btn-primary]="!!userDetailInfo.changed" 
-				[class.btn-outline-primary]="!userDetailInfo.changed" 
-				class="btn big-text" 
-				(click)="player.updateIgn(user.ign); userDetailInfo.changed=false;"
-			>
-				Save
-			</button><br/>
-			<button class="btn btn-outline-success my-2 my-sm-0 big-text" (click)="player.signOut(); window='tournament'">Sign Out</button>
+		<div *ngIf="window == 'account'" class="userDisplay row">
+			<div class="col-lg-3 col-md-4 spaced">
+				<h2>{{user.name}}</h2>
+				<h5>{{user.email}}</h5>
+				<div class="display: inline-block">
+					<span>IGN:</span>
+					<input 
+						class="form-control" 
+						placeholder="Enter IGN" 
+						[ngModel]="user.ign || ''" 
+						(ngModelChange)="user.ign=$event; userDetailInfo.changed=true;"
+					/>
+				</div>
+				<button 
+					[class.btn-primary]="!!userDetailInfo.changed" 
+					[class.btn-outline-primary]="!userDetailInfo.changed" 
+					class="btn big-text" 
+					(click)="player.updateIgn(user.ign); userDetailInfo.changed=false;"
+				>
+					Save
+				</button><br/>
+				<button class="btn btn-outline-success big-text" (click)="signOut(); window='tournament'">Sign Out</button>
+			</div>
+			<div class="col-lg-3 col-md-4">
+				<h4>Invites:</h4>
+				<div *ngIf="player.invites.subject$() | async as invites; else noInvites">
+					<div *ngIf="invites.size > 0; else noInvites">
+						<ul>
+							<li *ngFor="let invite of invites | keyvalue">
+								<span>{{invite.value.name}}</span>
+								<img class="icon" src="../assets/check.svg" (click)="player.invites.acceptTeam(invite.key)"/>
+								<img class="icon" src="../assets/x.svg" (click)="player.invites.rejectTeam(invite.key)"/>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<ng-template #noInvites>
+					<h5>You have no team invites.</h5>
+				</ng-template>
+			</div>
+			<div class="col-lg-6 col-md-4"></div>
+		</div>
+		<div *ngIf="newTournament.visible" class="overlay">
+			<button type="button" class="btn btn-outline-danger" id="exit-button">Cancel</button>
+			<button type="button" class="btn btn-outline-primary" id="create-button" [disabled]="!newTournament.complete()">Create</button>
+			<div class="row">
+				<h2 class="bannerText">New Tournament</h2>
+			</div>
+			<div class="row">
+				<div class="col-xl-3 col-md-6">
+					<span>Name</span>
+					<input class="form-control" [(ngModel)]="newTournament.name"/>
+					<span>Minimum players per team</span>
+					<input class="form-control" maxlength=1 placeholder="1 to 4" pattern="[1,2,3,4]{1}" [(ngModel)]="newTournament.playersPerTeam"/>
+					<span>Series best of</span>
+					<input class="form-control" maxlength=1 placeholder="Odd number, 1 to 9" pattern="[1,3,5,7,9]{1}" [(ngModel)]="newTournament.bestOf"/>
+					Format
+					<select [(ngModel)]="newTournament.format.selected" class="form-control">
+						<option *ngFor="let format of newTournament.format.formats" value="{{format}}">{{format}}</option>
+					</select>
+				</div>
+				<div class="col-lg-3 col-md-6">
+					<div [ngSwitch]="newTournament.format.selected">
+						<div *ngSwitchCase="'Bracket'">
+							Series losses to be eliminated
+							<input class="form-control" maxlength=1 placeholder="1 to 3" pattern="[1,2,3]{1}" [(ngModel)]="newTournament.bracket.lossesToElim"/>
+							Number of groups
+							<input class="form-control" maxlength=1 placeholder="1 to 9" pattern="[1,2,3,4,5,6,7,8,9]{1}" [(ngModel)]="newTournament.bracket.groups"/>
+						</div>
+						<div *ngSwitchDefault>
+							Error: invalid format!
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-3 d-none d-lg-block"></div>
+			</div>
 		</div>
 	</div>
-	<ng-template #loginPage>
+
+	<ng-template #login>
 		<div class="loginDisplay">
 			<h2>Please Log In</h2>
 			<h4>(Fun stuff will be here eventually)</h4>

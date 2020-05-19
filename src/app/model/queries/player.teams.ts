@@ -1,10 +1,10 @@
 import { AngularFirestore, DocumentReference } from '@angular/fire/firestore';
 import { ReplaySubject } from 'rxjs';
+import { QueryInterface, QueryBuilder } from '../query';
+import { QueryManager } from '../query.manager';
 import { DocRef, Team } from '../models';
-import { QueryInterface, QueryBuilder } from './query';
-import { QueryManager } from './query.manager';
 
-export class TeamsService extends QueryManager<Team> {	
+export class PlayerTeams extends QueryManager<Team> {	
 	private teams$: ReplaySubject<Map<string, Team>>
 
 	constructor(private fs: AngularFirestore) { 
@@ -19,9 +19,9 @@ export class TeamsService extends QueryManager<Team> {
 	protected queryBuilder(user: DocumentReference): QueryInterface<Team> {
 		return QueryBuilder<Team>(
 			this.teams$,
-			this.fs.doc(user.path).collection<DocRef>("teams").stateChanges(),
+			this.fs.doc(user.path).collection<DocRef>("teams"),
 			[],
-			ref => this.fs.doc<Team>(ref.path).valueChanges()
+			ref => this.fs.doc<Team>(ref.path)
 		)
 	}
 
@@ -34,14 +34,17 @@ export class TeamsService extends QueryManager<Team> {
 			.collection<Team>("teams")
 			.add({
 				name: name,
-				players: [this.getRef()]
+				captain: this.getRef()
 			})
-			.then(id => this.fs.doc(this.getRef().path)
-				.collection<DocRef>("teams")
-				.doc(id.id)
-				.set({
-					ref: id
-				})
-			)
+			.then(id => {
+				this.fs.doc(id.path)
+					.collection("players")
+					.doc(this.getRef().id)
+					.set({ref: this.getRef()});
+				this.fs.doc(this.getRef().path)
+					.collection<DocRef>("teams")
+					.doc<DocRef>(id.id)
+					.set({ref: id});
+			})
 	}
 }
